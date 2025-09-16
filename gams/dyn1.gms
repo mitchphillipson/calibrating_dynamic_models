@@ -67,16 +67,16 @@ RK0	= KS0/K0;
 
 * 3) Solve for the interest rate 
 
-R	= (RK0 - D)/(1 + RK0 - D);
+R	= (RK0 - D)/(1 + RK0 - D); # r / (1+r)
 
 * 4) Find the price of a unit of Benchmark Capital
 
-PK0	= 1/(1-r);
+PK0	= 1/(1-R); 
 
 * 5) Set the steady-state Reference Paths
 
 QREF(T)	=	(1+G)**(ORD(T)-1);
-PREF(T) =	(1-r)**(ORD(T)-1);
+PREF(T) =	(1-R)**(ORD(T)-1); # pk0^-t
 
 Display K0,RK0,R,PK0,QREF,PREF;
 

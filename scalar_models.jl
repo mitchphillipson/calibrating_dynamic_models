@@ -55,6 +55,7 @@ function DYN1_data(;
     r = rk0-D
     pk0 = 1+r
     PREF = DenseAxisArray((1 / (1+r)).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
+    #PREF = DenseAxisArray((1-r).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
 
     ## As GAMS states ##
     if method == :GMS

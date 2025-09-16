@@ -57,7 +57,8 @@ function IndexedData(;
 
     
     QREF = DenseAxisArray((1+G).^(eachindex(time_periods).-1), time_periods)
-    PREF = DenseAxisArray((1 / (1+R)).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
+    #PREF = DenseAxisArray((1 / (1+R)).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
+    PREF = DenseAxisArray((1 -R).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
 
     adjusted_KS0 = K0*rk0
 
@@ -222,12 +223,30 @@ solve!(d4_model, cumulative_iteration_limit=0)
 generate_report(d4_model) |>
     x -> sort(x, :margin)
 
+K0 = d4_data.K0
+RK0 = d4_data.rk0
+R = d4_data.R
+pk0 = d4_data.pk0
+KS0 = d4_data.KS0
+D = d4_data.D
 
-d4_data.K0
-d4_data.KS0
-d4_data.D
+LD = d4_data.LD
+KD = d4_data.KD
 
-start_value.(d4_model[:RK])
+
+
+
+K0*(1-D)*value(d4_model[:PK][2001]) + KS0*value(d4_model[:RK][2000])
+
+K0*value(d4_model[:PK][2000])
+
+value.(d4_model[:K])
+
+
+zero_profit(d4_model[:K][2000])
+
+
+start_value.(d4_model[:PK])
 
 
 production(d4_model[:K][2000])
@@ -268,3 +287,8 @@ K0*(1-D) + KS0
 start_value(PK[2000])^2*K0
 
 D
+
+
+r = d4_data.R
+
+(1-r).^(0:1000)

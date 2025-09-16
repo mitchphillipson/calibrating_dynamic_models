@@ -21,6 +21,10 @@ solve!(static_model, cumulative_iteration_limit=0)
 set_value!(static_model[:TAX], 0.1);
 solve!(static_model)
 
+generate_report(static_model)
+
+
+DYN1_data()
 
 d1_data = DYN1_data(static_data);
 d1_model = DYN_Scalar(d1_data);
@@ -29,6 +33,9 @@ set_value!.(d1_model[:TAX][2010:2100], 0.1);
 solve!(d1_model)
 
 df1 = dyn_model_report(d1_model, d1_data; value_name = :dyn1)
+
+plot(df1, x=:time, y=:dyn1, color=:variable)
+
 
 
 
@@ -77,7 +84,7 @@ p_i = df |>
             ),
     )
 
-p_i = df |>
+p_o = df |>
     x -> subset(x, :variable => ByRow(==("output"))) |>
     df -> plot(
         df,
@@ -92,21 +99,31 @@ p_i = df |>
     )    
 
 
+p_cons = df |>
+    x -> subset(x, :variable => ByRow(==("cons"))) |>
+    df -> plot(
+        df,
+        x=:time,
+        y=:value,
+        color=:model,
+        Layout(
+            title="Consumption (% deviation from baseline)", 
+            yaxis_title="% deviation from baseline", 
+            xaxis_title="Year"
+            ),
+    )    
 
-df2 |>
-    x -> subset(x, :variable => ByRow(==("output")))
-
-
-value.(d2_model[:Y])
-
-
-
-
-value(d2_model[:Y][2001])/d2_data.QREF[2001]-1
-
-1.0203/d2_data.QREF[2001]-1
-
-
-
-df1 |>
-    x -> subset(x, :variable => ByRow(==("output")))
+    
+p_capital = df |>
+    x -> subset(x, :variable => ByRow(==("capital"))) |>
+    df -> plot(
+        df,
+        x=:time,
+        y=:value,
+        color=:model,
+        Layout(
+            title="Capital (% deviation from baseline)", 
+            yaxis_title="% deviation from baseline", 
+            xaxis_title="Year"
+            ),
+    )    

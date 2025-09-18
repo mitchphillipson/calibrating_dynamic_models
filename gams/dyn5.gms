@@ -77,6 +77,8 @@ SECQREF("2",LAST50) = SECQREF("2","2050")*((1.016)**(ORD(LAST50)));
 
 AVGREF(T) = SUM(J,SECQREF(J,T)*X0(J)/SUM(JJ,X0(J)));
 
+
+
 *  If you want to see the paths
 *Parameter graph(T,*);
 *graph(T,J)=secqref(j,T);
@@ -290,6 +292,8 @@ DYN5.ITERLIM = 200;
 $include DYN5.gen
 solve DYN5 using mcp;
 
+
+
 *  Lock in the productivity assumption and check
 *  That we have a unbalance equilibrium
 
@@ -339,6 +343,6 @@ OUTPUT(T,"Aggregate")	= 100*(Y.L(T)/BAUOUT(T,"AGGREGATE")-1);
 OUTPUT(T,"Sector1")	= 100*(X.L("1",T)/BAUOUT(T,"Sector1")-1);
 OUTPUT(T,"Sector2")	= 100*(X.L("2",T)/BAUOUT(T,"Sector2")-1);
 
-$libinclude gnuplot macro
-$libinclude gnuplot output
+*$libinclude gnuplot macro
+*$libinclude gnuplot output
 Display macro,output;

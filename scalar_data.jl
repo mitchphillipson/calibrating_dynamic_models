@@ -39,7 +39,7 @@ A structure to hold dynamic model data. Fields:
     - `QREF` : Reference output levels for each time period
     - `PREF` : Reference price levels for each time period in the horizon
 
-It's recommended to use the provided functions `DYN1_data`, `dynamic_data_2`, or 
+It's recommended to use the provided functions `dynamic_data_1`, `dynamic_data_2`, or 
 `dynamic_data_3` to create instances of this structure with appropriate parameters.
 """
 struct DynamicDataScalar

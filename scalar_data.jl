@@ -356,7 +356,7 @@ function dynamic_data_3(;
 
 
     QREF = DenseAxisArray((1+G).^(eachindex(time_periods).-1), time_periods)
-    PREF = DenseAxisArray((1-R).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
+    PREF = DenseAxisArray((1/(1+R)).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
     return DynamicDataScalar(Y0, C0, adjusted_LS0, adjusted_KS0, I0, G, D, K0, rk0, R, pk0, time_periods, time_periods_horizon, QREF, PREF)
 
 end

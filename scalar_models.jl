@@ -92,7 +92,7 @@ end
 Generates a DataFrame report for the dynamic model, showing percentage deviations 
 from the baseline for key variables over time.
 
-The DataFramw will contain four columns: `:time`, `:variable`, `:value`, and `:model`.
+The DataFrame will contain four columns: `:time`, `:variable`, `:value`, and `:model`.
 
 The `:variable` column indicates the economic variable (e.g., `:invest`, 
 `:cons`, `:capital`, `:output`), the `:value` column contains the percentage

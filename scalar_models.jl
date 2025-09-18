@@ -1,204 +1,9 @@
-using MPSGE
-using DataFrames
+"""
+    dynamic_scalar_model(data::DynamicDataScalar)
 
-import JuMP.Containers: DenseAxisArray
-
-struct StaticData
-    Y0::Float64
-    C0::Float64
-    LS0::Float64
-    KS0::Float64
-    I0::Float64
-end
-
-
-struct DYN_data
-    Y0::Float64
-    C0::Float64
-    LS0::Float64
-    KS0::Float64
-    I0::Float64
-    G::Float64
-    D::Float64
-    K0::Float64
-    rk0::Float64
-    r::Float64
-    pk0::Float64
-
-    time_periods::UnitRange{Int}
-    time_periods_horizon::UnitRange{Int}
-    QREF::DenseAxisArray{Float64, 1, Tuple{UnitRange{Int}}}
-    PREF::DenseAxisArray{Float64, 1, Tuple{UnitRange{Int}}}
-end
-
-
-function DYN1_data(;
-        start_year = 2000, 
-        end_year = 2100, 
-        Y0 = 200, 
-        C0 = 180, 
-        LS0 = 150, 
-        KS0 = 50, 
-        I0 = 20, 
-        G = 0.02, 
-        D = 0.02, 
-        method = :DOC
-    )
-    time_periods = start_year:end_year
-    time_periods_horizon = start_year:(end_year+1)
-
-    K0 = I0/(G+D)
-
-    rk0 = KS0/K0
-
-    QREF = DenseAxisArray((1+G).^(eachindex(time_periods).-1), time_periods)
-    r = rk0-D
-    pk0 = 1+r
-    PREF = DenseAxisArray((1 / (1+r)).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
-    #PREF = DenseAxisArray((1-r).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
-
-    ## As GAMS states ##
-    if method == :GMS
-        r = (rk0-D)/(1+rk0-D)
-    end
-
-    return DYN_data(Y0, C0, LS0, KS0, I0, G, D, K0, rk0, r, pk0, time_periods, time_periods_horizon, QREF, PREF)
-
-end
-
-function DYN1_data(
-        static_data::StaticData; 
-        start_year = 2000,
-        end_year = 2100,
-        G = 0.02,
-        D = 0.02,
-        method = :DOC
-    )
-
-    return DYN1_data(
-        start_year = start_year,
-        end_year = end_year,
-        Y0 = static_data.Y0,
-        C0 = static_data.C0,
-        LS0 = static_data.LS0,
-        KS0 = static_data.KS0,
-        I0 = static_data.I0,
-        G = G,
-        D = D,
-        method = method
-    )
-
-end
-
-
-function DYN2_data(;
-        start_year = 2000, 
-        end_year = 2100, 
-        Y0 = 200, 
-        C0 = 180, 
-        LS0 = 150, 
-        KS0 = 50, 
-        I0 = 20, 
-        G = 0.02, 
-        D = 0.02, 
-        R = 0.05
-    )
-    time_periods = start_year:end_year
-    time_periods_horizon = start_year:(end_year+1)
-
-    pk0 = 1/(1-R)
-    rk0 = (R-R*D+D)/(1-R)
-    K0 = KS0/rk0
-    adjusted_I0 = K0*(G+D)
-    adjusted_C0 = C0 + I0 - adjusted_I0
-
-    QREF = DenseAxisArray((1+G).^(eachindex(time_periods).-1), time_periods)
-    PREF = DenseAxisArray((1-R).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
-    return DYN_data(Y0, adjusted_C0, LS0, KS0, adjusted_I0, G, D, K0, rk0, R, pk0, time_periods, time_periods_horizon, QREF, PREF)
-
-end
-
-function DYN2_data(
-        static_data::StaticData; 
-        start_year = 2000,
-        end_year = 2100,
-        G = 0.02,
-        D = 0.02,
-        R = 0.05
-    )
-
-    return DYN2_data(
-        start_year = start_year,
-        end_year = end_year,
-        Y0 = static_data.Y0,
-        C0 = static_data.C0,
-        LS0 = static_data.LS0,
-        KS0 = static_data.KS0,
-        I0 = static_data.I0,
-        G = G,
-        D = D,
-        R = R
-    )
-
-end
-
-
-function DYN3_data(;
-        start_year = 2000, 
-        end_year = 2100, 
-        Y0 = 200, 
-        C0 = 180, 
-        LS0 = 150, 
-        KS0 = 50, 
-        I0 = 20, 
-        G = 0.02, 
-        D = 0.02, 
-        R = 0.05
-    )
-    time_periods = start_year:end_year
-    time_periods_horizon = start_year:(end_year+1)
-
-    pk0 = 1/(1-R)
-    rk0 = (R-R*D+D)/(1-R)
-    K0 = I0/(G+D)
-
-    adjusted_KS0 = K0*rk0
-    adjusted_LS0 = LS0 + KS0 - adjusted_KS0
-
-
-    QREF = DenseAxisArray((1+G).^(eachindex(time_periods).-1), time_periods)
-    PREF = DenseAxisArray((1-R).^(eachindex(time_periods_horizon).-1), time_periods_horizon)
-    return DYN_data(Y0, C0, adjusted_LS0, adjusted_KS0, I0, G, D, K0, rk0, R, pk0, time_periods, time_periods_horizon, QREF, PREF)
-
-end
-
-
-function DYN3_data(
-        static_data::StaticData; 
-        start_year = 2000,
-        end_year = 2100,
-        G = 0.02,
-        D = 0.02,
-        R = 0.05
-    )
-
-    return DYN3_data(
-        start_year = start_year,
-        end_year = end_year,
-        Y0 = static_data.Y0,
-        C0 = static_data.C0,
-        LS0 = static_data.LS0,
-        KS0 = static_data.KS0,
-        I0 = static_data.I0,
-        G = G,
-        D = D,
-        R = R
-    )
-
-end
-
-
-function DYN_Scalar(data::DYN_data)
+Creates a dynamic scalar MPSGE model based on the provided `data`.
+"""
+function dynamic_scalar_model(data::DynamicDataScalar)
 
     Y0 = data.Y0
     C0 = data.C0
@@ -281,8 +86,27 @@ function DYN_Scalar(data::DYN_data)
     return DYN1
 end
 
+"""
+    dyn_model_report(model::MPSGEModel, data::DynamicDataScalar; value_name = :value)
 
-function dyn_model_report(model::MPSGEModel, data::DYN_data; value_name = :value)
+Generates a DataFrame report for the dynamic model, showing percentage deviations 
+from the baseline for key variables over time.
+
+The DataFramw will contain four columns: `:time`, `:variable`, `:value`, and `:model`.
+
+The `:variable` column indicates the economic variable (e.g., `:invest`, 
+`:cons`, `:capital`, `:output`), the `:value` column contains the percentage
+deviation from the baseline, and the `:model` column is a constant indicating
+the name of the model (as specified by `value_name`).
+
+Values of each variable are calculated as:
+
+    100 * (value(model[:VAR][t]) / QREF[t] - 1)
+
+where `VAR` is the variable of interest and `QREF[t]` is the baseline value as 
+defined in `data.QREF`.
+"""
+function dyn_model_report(model::MPSGEModel, data::DynamicDataScalar; value_name = :value)
     time_periods = data.time_periods
     QREF = data.QREF
 
@@ -293,14 +117,21 @@ function dyn_model_report(model::MPSGEModel, data::DYN_data; value_name = :value
         capital = [100*(value(model[:K][t])/QREF[t] - 1) for t in time_periods],
         output = [100*(value(model[:Y][t])/QREF[t] - 1) for t in time_periods]
     ) |>
-    x -> stack(x, Not(:time), variable_name = :variable, value_name = value_name)
+    x -> stack(x, Not(:time), variable_name = :variable, value_name = :value) |>
+    x -> transform(x,
+        :variable => ByRow(y-> value_name) => :model
+    )
 
     return df
 end
 
 
+"""
+    static_scalar_model(data::StaticData)
 
-function DYN_Static(data::StaticData)
+Creates a static scalar MPSGE model based on the provided `data`.
+"""
+function static_scalar_model(data::StaticData)
 
     Y0 = data.Y0
     C0 = data.C0

@@ -436,11 +436,9 @@ version = "5.1.3+0"
 
 [[deps.MPSGE]]
 deps = ["DataFrames", "JuMP", "OrderedCollections", "PATHSolver"]
-git-tree-sha1 = "ba3069514c261869f88701bc0d9d55ed66c874fd"
-repo-rev = "main"
-repo-url = "https://github.com/julia-mpsge/MPSGE.jl.git"
+git-tree-sha1 = "63ad9327852d9adec2f16d0ec945b03e902bec74"
 uuid = "d5dc2f44-7ae2-49e9-bc77-b47b6bca565d"
-version = "0.6.2"
+version = "0.6.3"
 
 [[deps.MUMPS_seq_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "METIS_jll", "libblastrampoline_jll"]

@@ -74,7 +74,7 @@ df3 = dyn_model_report(d3_model, d3_data; value_name = :Adjust_Capital)
 ## Reporting ##
 ###############
 
-
+## Stack the dataframes for easier plotting
 df = vcat(
     df1,
     df2,
@@ -82,6 +82,7 @@ df = vcat(
 ) 
 
 
+## Individual Plot
 
 p_i = df |>
     x -> subset(x, :variable => ByRow(==("invest"))) |>
@@ -142,6 +143,54 @@ p_capital = df |>
     )
 
 
+## Interactive plot with dropdown menu to select variable
 
+
+mode_order = ["invest", "output", "cons", "capital"]
+modes = Dict(
+     "invest" => "Investment",
+     "cons" => "Consumption",
+     "capital" => "Capital",
+     "output" => "Output",
+)
+
+
+layout = Layout(
+    updatemenus = [
+        attr(
+            active=0,
+            buttons = [
+                attr(
+                    label=modes[mode],
+                    method="update",
+                    args=[
+                        attr(visible = [m == mode for m in mode_order] ),
+                        attr(title=modes[mode])
+                    ]
+                ) for mode in mode_order
+            ]
+        )
+    ];
+    title = string(modes[mode_order[1]]),
+    yaxis_title="% deviation from baseline",
+    xaxis_title="Year"
+)
+
+df |>
+    x -> plot(
+        vec([
+            scatter(
+                df |> x-> subset(x, :variable => ByRow(==(mode)), :model => ByRow(==(m))),
+                x=:time,
+                y=:value,
+                #line_color=:model,
+                mode="lines",
+                text=:model,
+                name = string(m),
+                visible = mode == mode_order[1]
+            ) for mode in mode_order, m in unique(df.model)
+        ]),
+        layout
+    )
 
 
